@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1117
 
-readonly SCRIPT=$(basename "$0")
-readonly VERSION='0.5.0'
-readonly RESOLUTIONS=(UHD 1920x1200 1920x1080 800x480 400x240)
+SCRIPT=$(basename "$0")
+readonly SCRIPT
+VERSION='0.5.0'
+readonly VERSION
+RESOLUTIONS=(UHD 1920x1200 1920x1080 800x480 400x240)
+readonly RESOLUTIONS
 
 usage() {
 cat <<EOF
