@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/thejandroman/bing-wallpaper.svg?branch=travis)](https://travis-ci.org/thejandroman/bing-wallpaper)
-
 Bing Wallpaper for Mac and Ubuntu
 =================================
 
@@ -12,6 +10,7 @@ The script was tested on:
 
 - Mac OS X 10.8 - 10.12
 - Ubuntu 12.04 - 16.04
+- Arch 2022.01.01
 
 How to use?
 -----------
@@ -38,7 +37,8 @@ Options:
                                  Will be created if it does not exist.
                                  [default: $HOME/Pictures/bing-wallpapers/]
   -r --resolution <resolution>   The resolution of the image to retrieve.
-                                 Supported resolutions: 1920x1200 1920x1080 800x480 400x240
+                                 Supported resolutions:
+                                 UHD 1920x1200 1920x1080 800x480 400x240
   -w --set-wallpaper             Set downloaded picture as wallpaper (Only mac support for now).
   -h --help                      Show this screen.
   --version                      Show version.
