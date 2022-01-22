@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1117
 
-readonly SCRIPT=$(basename "$0")
-readonly VERSION='0.4.0'
-readonly RESOLUTIONS=(1920x1200 1920x1080 800x480 400x240)
+SCRIPT=$(basename "$0")
+readonly SCRIPT
+VERSION='0.5.0'
+readonly VERSION
+RESOLUTIONS=(UHD 1920x1200 1920x1080 800x480 400x240)
+readonly RESOLUTIONS
 
 usage() {
 cat <<EOF
@@ -24,7 +27,8 @@ Options:
                                  Will be created if it does not exist.
                                  [default: $HOME/Pictures/bing-wallpapers/]
   -r --resolution <resolution>   The resolution of the image to retrieve.
-                                 Supported resolutions: ${RESOLUTIONS[*]}
+                                 Supported resolutions:
+                                 ${RESOLUTIONS[*]}
   -w --set-wallpaper             Set downloaded picture as wallpaper (Only mac support for now).
   -h --help                      Show this screen.
   --version                      Show version.
@@ -37,17 +41,12 @@ print_message() {
     fi
 }
 
-transform_urls() {
-    sed -e "s/\\\//g" | \
-        sed -e "s/[[:digit:]]\{1,\}x[[:digit:]]\{1,\}/$RESOLUTION/" | \
-        tr "\n" " "
-}
-
 # Defaults
 PICTURE_DIR="$HOME/Pictures/bing-wallpapers/"
 RESOLUTION="1920x1080"
 
 # Option parsing
+BOOST=1
 while [[ $# -gt 0 ]]; do
     key="$1"
 
@@ -71,7 +70,7 @@ while [[ $# -gt 0 ]]; do
             SSL=true
             ;;
         -b|--boost)
-            BOOST=$(($2-1))
+            BOOST=$(($2))
             shift
             ;;
         -q|--quiet)
@@ -104,29 +103,24 @@ done
 # Create picture directory if it doesn't already exist
 mkdir -p "${PICTURE_DIR}"
 
-# Parse bing.com and acquire picture URL(s)
-read -ra urls < <(curl -sL $PROTO://www.bing.com | \
-    grep -Eo "url\(.*?\)" | \
-    sed -e "s/url(\([^']*\)).*/http:\/\/bing.com\1/" | \
-    transform_urls)
+read -ra urls < <(curl -sL "$PROTO://www.bing.com/HPImageArchive.aspx?format=js&n=$BOOST" | \
+    # Extract the image urls from the JSON response
+    grep -Po '(?<=url":").*?(?=")' | \
+    # Set the image resolution
+    sed -e "s/[[:digit:]]\{1,\}x[[:digit:]]\{1,\}/$RESOLUTION/" | \
+    # FQDN the image urls
+    sed -e "s/\(.*\)/${PROTO}\:\/\/www.bing.com\1/" | \
+    tr "\n" " ")
 
-if [ -n "$BOOST" ]; then
-    read -ra archiveUrls < <(curl -sL "$PROTO://www.bing.com/HPImageArchive.aspx?format=js&n=$BOOST" | \
-        grep -Eo "url\(.*?\)" | \
-        sed -e "s/url(\([^']*\)).*/http:\/\/bing.com\1/" | \
-        transform_urls)
-    urls=( "${urls[@]}" "${archiveUrls[@]}" )
-fi
-
-for p in "${urls[@]}"; do
+for pic in "${urls[@]}"; do
     if [ -z "$FILENAME" ]; then
-        filename=$(echo "$p" | sed -e 's/.*[?&;]id=\([^&]*\).*/\1/' | grep -oe '[^\.]*\.[^\.]*$')
+        filename=$(echo "$pic" | sed -e 's/.*[?&;]id=\([^&]*\).*/\1/' | grep -oe '[^\.]*\.[^\.]*$')
     else
         filename="$FILENAME"
     fi
     if [ -n "$FORCE" ] || [ ! -f "$PICTURE_DIR/$filename" ]; then
         print_message "Downloading: $filename..."
-        curl $CURL_QUIET -Lo "$PICTURE_DIR/$filename" "$p"
+        curl $CURL_QUIET -Lo "$PICTURE_DIR/$filename" "$pic"
     else
         print_message "Skipping: $filename..."
     fi
