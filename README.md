@@ -56,6 +56,15 @@ loaded with the command `launchctl load
 $HOME/Library/LaunchAgents/com.ideasftw.bing-wallpaper.plist`. Modify
 the plist as needed to point to **bing-wallpaper.sh**.
 
+* For recent versions of Mac, you'll need to install GNU grep since Mac changed to
+BSD grep, which doesn't support the -P option. You can use brew:
+
+```
+$ brew install grep
+```
+
+* Then update the bing-wallpaper.sh file to change all instances of `grep` to `ggrep`.
+
 Configuration on Ubuntu
 -----------------------
 **TL;DR:**
